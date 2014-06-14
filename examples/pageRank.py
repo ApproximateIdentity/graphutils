@@ -2,7 +2,7 @@ from graphutils.parsing import parseline
 from graphutils.metrics import l1
 from graphutils.distributions import initdist, iterdist
 
-data_filepath = './data'
+data_filepath = './graph.thomas'
 EPSILON = 0.0000001
 
 if __name__ == '__main__':
