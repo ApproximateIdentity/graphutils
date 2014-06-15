@@ -2,17 +2,25 @@ from sys import stdin, stdout
 
 from graphutils.parsing import parseline
 
-if __name__ == '__main__':
-    for line in stdin:
+
+def convert_thomas_to_paul(infile, outfile):
+    """
+    Convert from Thomas' graph format to Paul's graph format.
+
+    Parameters
+    ----------
+    infile : file object
+    outfile : file object
+    """
+    for line in infile:
         id, neighbors = parseline(line)
-        try:
-            # Note the space before final newline!
-            stdout.write(id + '\n' + ' '.join(neighbors) + ' \n')
-        except OSError:
-            break
+        outfile.write(id + '\n' + ' '.join(neighbors) + ' \n')
         
-    # To match final newline in file.
+    outfile.write('\n')
+
+
+if __name__ == '__main__':
     try:
-        stdout.write('\n')
-    except OSError:
+        convert_thomas_to_paul(stdin, stdout)
+    except IOError:
         pass
