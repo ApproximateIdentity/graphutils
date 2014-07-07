@@ -32,7 +32,9 @@ def vertOutList(filename):
 	return A
 
 # return A when undirected
+# It has come to my attention that this algorithm assumes undirectedness
 def vertInList(A, dim):
+	"""
 	B = []
 	i = 0
 	while (i < dim):
@@ -47,8 +49,10 @@ def vertInList(A, dim):
 			j += 1
 		B.append(x)
 		i += 1
+	B = A"""
+	
 	B = A
-	return B
+	return B 
 	
 def getAlpha():
 	alpha = 2.

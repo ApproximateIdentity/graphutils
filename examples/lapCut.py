@@ -174,9 +174,9 @@ def sort(Set):
 
 
 #get Adjacency matrix A and number of vertices A, dim = getAdjacency('graph.txt')
-default = 'graph1.txt'
-print "Enter graph filename or press enter to use default %s" %default
-filename = raw_input('>')
+default = 'newgraph.txt'
+#print "Enter graph filename or press enter to use default %s" %default
+#filename = raw_input('>')
 if (filename == ''):
 	filename = default
 A, dim = getAdjacency(filename)
