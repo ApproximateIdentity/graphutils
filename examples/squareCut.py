@@ -6,43 +6,26 @@ def getEigens(m):
 	
 #returns an Adjacency matrix and dim the number of vertices
 def getAdjacency(filename):
-	a = []
-	fp = open(filename)
+	edgeList = []
 	dim = 0
 	#compute dim = # nodes of graph
-	while (fp.readline()):
-		dim += 1
-	dim = dim/2
-	fp = open(filename)
-	line = fp.readline()
-	w = 0
-	while (line):
-		line = fp.readline()
-		temp = line.split("\n")
-		temp = temp[0].split(" ")
-		if (w == 0):
-			k = 0
-			while (k < len(temp)):
-				k += 1
-		w += 1
-		k = 0
-		while (k < len(temp)):
-			if (temp[k] == ''):
-				del temp[k]
-				print w, k
-			else:
-				k += 1
-
-		j = 0
+	with open(filename) as f:
+		i = 0
+		for verts in f:
+			if (i % 2 == 1):
+				dim += 1
+				edgeList.append(verts.strip().split(" "))
+			i += 1	
+	a = []
+	for i in range(dim):		
 		b = []
-		while (j < dim):
+		for j in range(dim):
 			b.append(0)
-			j += 1	
-		for i in temp:
-			b[int(i)] = 1.
-		
+		for node in edgeList[i]:
+			#print i, node
+			b[int(node)] += 1.		
 		a.append(b)
-		line = fp.readline()
+
 	return matrix(a), dim
 
 #given an adjacency matrix and number of nodes, produces 
@@ -50,22 +33,17 @@ def getDiagonal(A, dim):
 	i = 0
 	j = 0
 	d = [];
-	
-	while (i < dim):
-		deg = 0
+	for i in range(dim):
 		row = []
-		k = 0
-	
-		while (k < dim):
+		deg = 0
+		for k in range(dim):
 			row.append(0)
-			k += 1
-		j = 0
-		while (j < dim):
+		for j in range(dim):
 			deg += A[i, j]
-			j += 1
+		
 		row[i] = deg
 		d.append(row)
-		i+=1
+
 	return matrix(d)
 
 
@@ -179,6 +157,18 @@ def distance(p, q, dim):
                 i += 1
         return dist
 
+def writeBigraph(A, dim):
+	with open('bigraph.txt', 'w') as f:
+		for i in range(dim):
+			f.write("%d\n" %i)
+			for j in range(dim):
+				if A[i, j] == 1:
+					for k in range(dim):
+						if (A[j,k] == 1):
+							f.write("%d " %k)
+			if i < dim -1:
+				f.write("\n")
+		
 #get Adjacency matrix A and number of vertices A, dim = getAdjacency('graph.txt')
 default = 'Bipartite.txt'
 print "Enter graph filename or press enter to use default %s" %default
@@ -187,40 +177,41 @@ if (filename == ''):
 	filename = default
 A, dim = getAdjacency(filename)
 D = getDiagonal(A, dim)
-
 InvD = D.I
 ID = getID(dim)
 #Compute Lazy Random Walk
-W = .5*(ID +InvD * A)
+#W = .5*(ID +InvD * A)
 #Compte Lazy Random Walk Square
-W2 = W*W
-
+#W2 = W*W
+writeBigraph(A, dim)
+ATwo, dim = getAdjacency('bigraph.txt')
+DTwo = getDiagonal(ATwo, dim)
+WTwo = .5*(ID + DTwo.I*ATwo)
 print "choose alpha between 0 and 1"
 alpha = float(raw_input(">"))
 
 print "choose starting vertex between 0 and %d" %(dim-1)
 su = int(raw_input(">"))
 q = []
-i = 0
 #initialize starting distribution Xu
-while (i < dim):
+for i in range(dim):	
 	if (i == su):
 		q.append(1)
 	else:
 		q.append(0)
-	i += 1
 q = matrix(q)
 Xu = q
+print "Xu", Xu
 i = 2
-p = alpha * (1-alpha) * q * W2
+p = alpha * (1-alpha) * q * WTwo
 #compute p = alpha*Sum(((1-alpha)**i)*Xu * (W2**i))
 while (distance(p, q, dim) > .000001):
 	q = p
-	p = q + alpha*((1-alpha)**i) * Xu * (W2 ** i)
+	p = q + alpha*((1-alpha)**i) * Xu * (WTwo ** i)
 	i += 1
 
 #order the vertices by least to greatest square pageRank component
-V = sortIndices(p)
+V = sortIndices(p*DTwo.I)
 print V
 """
 #compute the total volume of the graph
