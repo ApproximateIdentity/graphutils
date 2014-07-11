@@ -1,70 +1,31 @@
+import sys
+import argparse
+
 import math
 from numpy import matrix
 
 from graphutils.common import Pairwise
 
-def getDim(filename):
-    """
-    Return the number of verticies of a graph.
-    """
-    numlines = 0
-    with open(filename) as f:
-        for _, _ in Pairwise(f):
-            numlines += 1
-    return numlines
+def loadgraph(graphfile):
+    graph = graphfile.read().splitlines()
+    graph = [line.split('->') for line in graph]
+    graph = [[node, edges.split(',')] for node, edges in graph]
+    return graph
 
-
-def getVertOutList(filename):
+def getVertOutList(graph):
     """
     Build lists of vertices reachable by each vertex.
     """
-    vertOutList = []
-    with open(filename) as f:
-        for _, line in Pairwise(f):
-            line = line.strip()
-            line = line.split(' ')
-            vertOutList.append(line)
+    vertOutList = [edges for _, edges in graph]
     return vertOutList
 
 
-def getVertInList(vertOutList, dim):
+def getVertInList(vertOutList):
     """
     Build lists of vertices pointing to each vertex.
     """
     vertInList = vertOutList
     return vertInList
-
-
-def getAlpha():
-    """
-    Prompt for initial alpha.
-    """
-    while True:
-        print "Choose a jumping constant (0 to 1) for alpha"
-        alpha = raw_input(">")
-        try:
-            alpha = float(alpha)
-        except ValueError:
-            continue
-        if alpha >= 0 and alpha <= 1:
-            break
-    return alpha
-
-
-def getS(dim):
-    """
-    Prompt for point to "personalize around".
-    """
-    while True:
-        print "Choose a vertex (0 to %d) for S" % (dim - 1)
-        s = raw_input(">")
-        try:
-            s = int(s)
-        except ValueError:
-            continue
-        if s >= 0 and s <= dim -1:
-            break
-    return s
 
 
 def init_distribution(s, dim):
@@ -183,51 +144,73 @@ def getCheager(S, size, A, B, tVol):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('filename',
+                        nargs='?',
+                        help=('File containing graph. If left unspecified, '
+                              'will read from standard in.'),
+                        default=None)
+    parser.add_argument('-a', '--alpha', dest='alpha',
+                        help='Alpha parameter.',
+                        type=float,
+                        default=0.5)
+    parser.add_argument('-p', '--personalizednode', dest='personalizednode',
+                        help='Alpha parameter.',
+                        type=int,
+                        default=0)
+    args = parser.parse_args()
 
-    default  = 'graph1.txt'
+    filename = args.filename
+    if filename is not None:
+        graphfile = open(filename)
+    else:
+        graphfile = sys.stdin
+    graph = loadgraph(graphfile)
+    graphfile.close()
 
-    print "Enter graph filename or press enter to use default: %s" % default
-    filename = raw_input('>')
-    if (filename == ''):
-        filename = default
+    dim = len(graph)
 
-    dim = getDim(filename)
+    alpha = args.alpha
+    assert(alpha >= 0.0 and alpha <= 1.0)
 
-    A = getVertOutList(filename)
+    personalizednode = args.personalizednode
+    assert(personalizednode >=0 and personalizednode < dim)
 
-    B = getVertInList(A, dim)
-    alpha = getAlpha()
-    s = getS(dim)
+    vertOutList = getVertOutList(graph)
 
-    dist_old = init_distribution(s, dim)
+    vertInList = getVertInList(vertOutList)
 
-    rank = computeRank(A, dim)
+    dist_old = init_distribution(personalizednode, dim)
 
-    dist_new = new_distribution(dist_old, B, dim, alpha, rank, s)
+    rank = computeRank(vertOutList, dim)
+
+    dist_new = new_distribution(dist_old, vertInList, dim, alpha, rank,
+                                personalizednode)
 
     dist = distance(dist_new, dist_old)
     iter = 1
     #iterates the PageRank algorithm until it converges
     while (dist > .0000001):
         dist_old = dist_new
-        dist_new = new_distribution(dist_old, B, dim, alpha, rank, s)
+        dist_new = new_distribution(dist_old, vertInList, dim, alpha, rank,
+                                    personalizednode)
         dist = distance(dist_old, dist_new)
         iter += 1
     #print "distribution is:"
     #print p
     print "iterations: %d" %iter
-    v = getVector(dim, A, B, dist_new)
+    v = getVector(dim, vertOutList, vertInList, dist_new)
     S = sortIndices(v)
     #print "S:"
     #print S
-    tVol = getTotalVol(A, B)
+    tVol = getTotalVol(vertOutList, vertInList)
     i = 0
     minH = 2
     ind = 0
     #computes CheagerRatio of each S(i), keeping track
     # of smallest one along the way
     while (i < dim-1):
-        x = getCheager(S, i, A, B, tVol)
+        x = getCheager(S, i, vertOutList, vertInList, tVol)
         if (x > .0001 and x < minH):
             minH = x
             ind = i
