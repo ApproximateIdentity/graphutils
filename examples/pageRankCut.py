@@ -10,6 +10,7 @@ def loadgraph(graphfile):
     graph = graphfile.read().splitlines()
     graph = [line.split('->') for line in graph]
     graph = [[node, edges.split(',')] for node, edges in graph]
+    #print "hey", graph
     return graph
 
 def getVertOutList(graph):
@@ -86,9 +87,32 @@ def getTotalVol(graph):
         tVol += len(targets)
     return tVol
 
-
+def update(graph, S, i):
+    """
+    updates bound, vol after adding ith node of sweep set
+    """
+    global vol
+    vol += len(graph[int(S[i])])
+    global bound
+    bound += len(graph[int(S[i])])
+    for j in graph[int(S[i])]:
+        for k in range(i+1):
+            if j == int(S[k]):
+                bound -= 1
+	
+def getMinVol():
+    global vol
+    global volC
+    volC = tVol - vol
+    if vol < volC:
+        return vol
+    return volC
+	
+	
+        
 #given a list of vertices S and the size of the set,
 #compute cheager ratio of the set of the first 'size' vertices
+"""
 def getCheager(S, size, A, B, tVol):
     bound = 0
     vol = 0
@@ -114,7 +138,7 @@ def getCheager(S, size, A, B, tVol):
         j += 1
 #    print "bound ", bound
     return float(bound)/minVol
-
+"""
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -164,12 +188,25 @@ if __name__ == '__main__':
 
     S = [node for node, _ in sorted(v, key=lambda a: a[1])]
 
-    #print "S:"
-    #print S
+    print "S:"
+    print S
     tVol = getTotalVol(graph)
+    vol = 0
+    bound = 0
     i = 0
     minH = 2
     ind = 0
+    for i in range(dim-1):
+        update(graph, S, i)
+        phi = 1.*bound/getMinVol()
+        if phi < minH:
+            minH = phi
+            ind = i
+    print "minH: ", minH
+    print ind
+    minH = 2
+    ind = 0
+    """"
     #computes CheagerRatio of each S(i), keeping track
     # of smallest one along the way
     vertOutList = getVertOutList(graph)
@@ -190,3 +227,4 @@ if __name__ == '__main__':
 
     print "S(%d) =  " % ind
     print S
+    """
