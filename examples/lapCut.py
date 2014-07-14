@@ -44,7 +44,7 @@ def getAdjacency(filename):
 		line = fp.readline()
 	return matrix(a), dim
 
-#given an adjacency matrix and number of nodes, produces 
+#given an adjacency matrix and number of nodes, produces degree matrix 
 def getDiagonal(A, dim):
 	i = 0
 	j = 0
@@ -175,8 +175,8 @@ def sort(Set):
 
 #get Adjacency matrix A and number of vertices A, dim = getAdjacency('graph.txt')
 default = 'newgraph.txt'
-#print "Enter graph filename or press enter to use default %s" %default
-#filename = raw_input('>')
+print "Enter graph filename or press enter to use default %s" %default
+filename = raw_input('>')
 if (filename == ''):
 	filename = default
 A, dim = getAdjacency(filename)
