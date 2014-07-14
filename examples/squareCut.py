@@ -67,7 +67,7 @@ def sortIndices(M):
 		next1 = V[i, 1]
 		next0 = V[i, 0]
 		j = i
-		while (j > 0 and V[j-1, 1] > next1):
+		while (j > 0 and V[j-1, 1] < next1):
 			V[j, 1] = V[j-1, 1]
 			V[j, 0] = V[j-1, 0]
 			j = j - 1
@@ -83,17 +83,17 @@ def sortIndices(M):
 	return I		
 
 #given a Degree matrix, returns the total volume of a graph		
-def getTotalVol(M):
-	i = 0
-	tVol = 0
-	while (i < dim):
-		tVol += M[i, i]
-		i+=1
-	return tVol
+def getTotalVol(D):
+	i = 0 
+	total = 0
+	for i in range(dim):
+		total += D[i, i]
+	return total
 
 #given a list of vertices S and the size of the set,
 #compute cheager ratio of the set of the first 'size' vertices
-def getCheager(S, size):
+"""
+def getConductance(S, size, D):
 	bound = 0
 	vol = 0
 	minVol = 0
@@ -118,7 +118,32 @@ def getCheager(S, size):
 		j += 1
 #	print "bound ", bound
 	return float(bound)/minVol
+"""
+def update(S, size, A, D):
+	global vol
+	vol += D[S[size], S[size]]
 
+	global bound
+	bound += D[S[size], S[size]]
+	for i in range(size):
+		bound -= A[S[size], S[i]]
+
+def getMinVol():
+	global vol, tVol
+	volC = tVol - vol
+	if (vol < volC):
+		return vol
+	return volC
+
+def getMaxVol():
+	global vol, tVol
+	volC = tVol - vol
+	if (vol < volC):
+		return volC
+	return vol
+		
+					
+		
 def sort(Set):
 	i = 0
 	while (i < len(Set)):
@@ -132,6 +157,8 @@ def sort(Set):
 	return Set
 
 def getID(dim):
+# returns dim x dim identity matrix
+
 	i = 0
 	j = 0
 	id = []
@@ -149,6 +176,7 @@ def getID(dim):
 	return matrix(id)
 
 def distance(p, q, dim):
+#returns distance between old and new distributions
         i = 0
         dist = 0.
         while(i < dim):
@@ -158,6 +186,9 @@ def distance(p, q, dim):
         return dist
 
 def writeBigraph(A, dim):
+#writes a file expressing the weighted bigraph obtained 
+#from the original graph
+
 	with open('bigraph.txt', 'w') as f:
 		for i in range(dim):
 			f.write("%d\n" %i)
@@ -179,10 +210,6 @@ A, dim = getAdjacency(filename)
 D = getDiagonal(A, dim)
 InvD = D.I
 ID = getID(dim)
-#Compute Lazy Random Walk
-#W = .5*(ID +InvD * A)
-#Compte Lazy Random Walk Square
-#W2 = W*W
 writeBigraph(A, dim)
 ATwo, dim = getAdjacency('bigraph.txt')
 DTwo = getDiagonal(ATwo, dim)
@@ -201,7 +228,7 @@ for i in range(dim):
 		q.append(0)
 q = matrix(q)
 Xu = q
-print "Xu", Xu
+#print "Xu", Xu
 i = 2
 p = alpha * (1-alpha) * q * WTwo
 #compute p = alpha*Sum(((1-alpha)**i)*Xu * (W2**i))
@@ -212,7 +239,50 @@ while (distance(p, q, dim) > .000001):
 
 #order the vertices by least to greatest square pageRank component
 V = sortIndices(p*DTwo.I)
+#print p*DTwo.I
 print V
+
+#find min cheager of orig. graph
+vol = 0
+bound = 0
+tVol = getTotalVol(D)
+min = 2
+ind = 0
+for i in range(dim-1):
+	update(V, i, A, D)
+	#print vol, bound
+	phi = 1.*bound/getMinVol()
+	if phi < min:
+		min = phi
+		ind  = i
+print "Min Inductance of Graph: ", min
+result = "S: {"
+for i in range(ind + 1):
+	result += " %d" %int(V[i])
+result += "}"
+print result
+
+#find max inductance of bigraph
+vol = 0
+bound = 0
+tvol = getTotalVol(DTwo)
+max = 0
+ind = 0
+for i in range(dim-1):
+	update(V, i, ATwo, DTwo)
+	#print vol, bound
+	psi = 1.*bound/getMaxVol()
+	if psi > max:
+		max = psi
+		ind = i
+
+print "Max Conductance of Bigraph: ", max
+result = "S: {"
+for i in range(ind + 1):
+	result += " %d" %int(V[i])
+result += "}"
+print result
+
 """
 #compute the total volume of the graph
 tVol = getTotalVol(D)
