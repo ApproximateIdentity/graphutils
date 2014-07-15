@@ -13,21 +13,6 @@ def loadgraph(graphfile):
     #print "hey", graph
     return graph
 
-def getVertOutList(graph):
-    """
-    Build lists of vertices reachable by each vertex.
-    """
-    vertOutList = [edges for _, edges in graph]
-    return vertOutList
-
-
-def getVertInList(vertOutList):
-    """
-    Build lists of vertices pointing to each vertex.
-    """
-    vertInList = vertOutList
-    return vertInList
-
 
 def init_distribution(pnode, graph):
     """
@@ -171,7 +156,6 @@ if __name__ == '__main__':
     ind = 0
     for i in range(dim-1):
         update(graph, S, i)
-        print bound, vol
         phi = 1.*bound/getMinVol()
         if phi < minH:
             minH = phi
