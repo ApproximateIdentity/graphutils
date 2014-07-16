@@ -212,9 +212,11 @@ for i in range(ind + 1):
 result += "}"
 print result
 
-print "Max Bound of Graph: ", min
+print "Max Bound of Graph: ", maxBound
 result = "S: {"
 for i in range(ind1 + 1):
 	result += " %d" %int(V[i])
 result += "}"
 print result
+
+print "4*bound/vol(G) = %f" %(4.*maxBound/tVol)
