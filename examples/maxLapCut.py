@@ -1,6 +1,8 @@
 import math
 from numpy import matrix
 from numpy import linalg
+import sys
+import argparse
 def getEigens(m):
 	return linalg.eig(m)
 	
@@ -161,11 +163,15 @@ def getMaxEval(M, dim):
 	return ind
 		
 #get Adjacency matrix A and number of vertices A, dim = getAdjacency('graph.txt')
-default = 'Bipartite.txt'
-print "Enter graph filename or press enter to use default %s" %default
-filename = raw_input('>')
-if (filename == ''):
-	filename = default
+parser =  argparse.ArgumentParser()
+parser.add_argument('filename', help = 'input graph file', default = 'Bipartite.txt')
+#default = 'Bipartite.txt'
+#print "Enter graph filename or press enter to use default %s" %default
+#filename = raw_input('>')
+#if (filename == ''):
+#	filename = default
+args = parser.parse_args()
+filename = args.filename
 A, dim = getAdjacency(filename)
 D = getDiagonal(A, dim)
 L = D - A
@@ -189,32 +195,19 @@ print "V:", V
 vol = 0
 bound = 0
 tVol = getTotalVol(D)
-min = 2
 ind = 0
-ind1 = 0
 maxBound = 0
 for i in range(dim-1):
 	update(V, i, A, D)
-	print vol, bound
-	phi = (1.*bound)/getMinVol()
+	#print vol, bound
 	#print "phi: ", phi
 	if bound > maxBound:
 		maxBound = bound
-		ind1 = i
-	if phi < min:
-		min = phi
 		ind = i
-
-print "Min Conductance of Graph: ", min
-result = "S: {"
-for i in range(ind + 1):
-	result += " %d" %int(V[i])
-result += "}"
-print result
 
 print "Max Bound of Graph: ", maxBound
 result = "S: {"
-for i in range(ind1 + 1):
+for i in range(ind + 1):
 	result += " %d" %int(V[i])
 result += "}"
 print result
