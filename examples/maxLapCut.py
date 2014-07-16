@@ -191,11 +191,16 @@ bound = 0
 tVol = getTotalVol(D)
 min = 2
 ind = 0
+ind1 = 0
+maxBound = 0
 for i in range(dim-1):
 	update(V, i, A, D)
-	#print vol, bound
+	print vol, bound
 	phi = (1.*bound)/getMinVol()
 	#print "phi: ", phi
+	if bound > maxBound:
+		maxBound = bound
+		ind1 = i
 	if phi < min:
 		min = phi
 		ind = i
@@ -203,6 +208,13 @@ for i in range(dim-1):
 print "Min Conductance of Graph: ", min
 result = "S: {"
 for i in range(ind + 1):
+	result += " %d" %int(V[i])
+result += "}"
+print result
+
+print "Max Bound of Graph: ", min
+result = "S: {"
+for i in range(ind1 + 1):
 	result += " %d" %int(V[i])
 result += "}"
 print result
