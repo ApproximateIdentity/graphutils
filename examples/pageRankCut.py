@@ -13,21 +13,6 @@ def loadgraph(graphfile):
     #print "hey", graph
     return graph
 
-def getVertOutList(graph):
-    """
-    Build lists of vertices reachable by each vertex.
-    """
-    vertOutList = [edges for _, edges in graph]
-    return vertOutList
-
-
-def getVertInList(vertOutList):
-    """
-    Build lists of vertices pointing to each vertex.
-    """
-    vertInList = vertOutList
-    return vertInList
-
 
 def init_distribution(pnode, graph):
     """
@@ -92,13 +77,13 @@ def update(graph, S, i):
     updates bound, vol after adding ith node of sweep set
     """
     global vol
-    vol += len(graph[int(S[i])])
+    vol += len(graph[int(S[i])][1])
     global bound
-    bound += len(graph[int(S[i])])
-    for j in graph[int(S[i])]:
-        for k in range(i+1):
-            if j == int(S[k]):
-                bound -= 1
+    bound += len(graph[int(S[i])][1])
+    for j in graph[int(S[i])][1]:
+        for k in range(i):
+            if int(j) == int(S[k]):
+                bound -= 2
 	
 def getMinVol():
     global vol
@@ -112,33 +97,6 @@ def getMinVol():
         
 #given a list of vertices S and the size of the set,
 #compute cheager ratio of the set of the first 'size' vertices
-"""
-def getCheager(S, size, A, B, tVol):
-    bound = 0
-    vol = 0
-    minVol = 0
-    i = 0
-    while (i <= size):
-        vol += .5*(len(A[int(S[i])]) + len(B[int(S[i])]))
-        i += 1
-    volC = tVol - vol
-    if (vol < volC):
-        minVol = vol
-    else:
-        minVol = volC
-    j = 0
-    k = 0
-    while (j <= size):
-        k = size + 1
-        while (k < dim):
-            for x in A[int(S[j])]:
-                if (int(x) == int(S[k])):
-                    bound += 1
-            k += 1
-        j += 1
-#    print "bound ", bound
-    return float(bound)/minVol
-"""
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -203,28 +161,11 @@ if __name__ == '__main__':
             minH = phi
             ind = i
     print "minH: ", minH
-    print ind
-    minH = 2
-    ind = 0
-    """"
-    #computes CheagerRatio of each S(i), keeping track
-    # of smallest one along the way
-    vertOutList = getVertOutList(graph)
-    vertInList = getVertInList(vertOutList)
-    while (i < dim-1):
-        x = getCheager(S, i, vertOutList, vertInList, tVol)
-        if (x > .0001 and x < minH):
-            minH = x
-            ind = i
-        i += 1
-    print "minH: ", minH
     i = 0
     set = []
-    #print the optimal s[i]
     while (i <= ind):
         set.append(int(S[i]))
         i += 1
 
     print "S(%d) =  " % ind
-    print S
-    """
+    print set
