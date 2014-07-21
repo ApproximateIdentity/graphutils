@@ -101,7 +101,6 @@ def sortIndices(M):
 		row.append(M[i])
 		v.append(row)
 		i += 1
-#	print v
 	V = matrix(v)
 	i = 0
 	while (i < dim):
